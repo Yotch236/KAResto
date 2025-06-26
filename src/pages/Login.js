@@ -79,56 +79,52 @@ export default function Login(){
         });
     }
 
-    function retrieveUserDetails(token){
-        fetch("https://karestoapi.onrender.com/users/details",{
-            headers: {
-                // THIS IS THE CRUCIAL CHANGE: ADD "Bearer " prefix
-                Authorization: `Bearer ${token}` 
-            }
-        })
-        .then(res => {
-            if (!res.ok) { // Check for non-2xx status codes from the details endpoint
-                console.error("HTTP error during user details retrieval:", res.status, res.statusText);
-                return res.json().then(errorData => {
-                    // Propagate the error with more details
-                    throw new Error(errorData.message || "Failed to fetch user details with non-OK status");
-                });
-            }
-            return res.json();
-        })
-        .then(data => {
-            // Log the received data to inspect its structure
-            console.log("User details received:", data); 
-            if(data._id){
-                Swal.fire({
-                    icon: "success",
-                    title: `Welcome, ${data.firstName || 'User'}`, // Added fallback for firstName
-                    showConfirmButton: false,
-                    timer: 1500
-                });
+  function retrieveUserDetails(token){
+    fetch("https://karestoapi.onrender.com/users/details", {
+        headers: {
+            Authorization: `Bearer ${token}`
+        }
+    })
+    .then(res => {
+        if (!res.ok) {
+            console.error("HTTP error during user details retrieval:", res.status, res.statusText);
+            return res.json().then(errorData => {
+                throw new Error(errorData.message || "Failed to fetch user details with non-OK status");
+            });
+        }
+        return res.json();
+    })
+    .then(data => {
+        console.log("User details received:", data); 
+        if(data._id){
+            Swal.fire({
+                icon: "success",
+                title: data.isAdmin ? "Welcome Admin" : `Welcome, ${data.firstName || 'User'}`,
+                showConfirmButton: false,
+                timer: 1500
+            });
 
-                setUser({id: data._id, isAdmin: data.isAdmin});
+            setUser({ id: data._id, isAdmin: data.isAdmin });
 
-                setTimeout(() => navigate("/order"), 500);
-            } else {
-                // This block is hit if the backend returns a 200 OK but data._id is missing
-                console.error("User details response missing _id:", data);
-                Swal.fire({
-                    icon: "error",
-                    title: "Error",
-                    text: "Failed to retrieve user details: User ID not found in response.",
-                });
-            }
-        })
-        .catch(error => {
-            console.error("Error fetching user details:", error);
+            setTimeout(() => navigate("/order"), 500);
+        } else {
+            console.error("User details response missing _id:", data);
             Swal.fire({
                 icon: "error",
                 title: "Error",
-                text: `Error fetching user details: ${error.message || "An unknown network error occurred"}`,
+                text: "Failed to retrieve user details: User ID not found in response.",
             });
+        }
+    })
+    .catch(error => {
+        console.error("Error fetching user details:", error);
+        Swal.fire({
+            icon: "error",
+            title: "Error",
+            text: `Error fetching user details: ${error.message || "An unknown network error occurred"}`,
         });
-    }
+    });
+}
 
     useEffect(() => {
         if(user.id !== null){
