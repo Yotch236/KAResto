@@ -30,12 +30,18 @@ export default function AppNavBar() {
               Home
             </Nav.Link>
 
-            <Nav.Link as={NavLink} to="/order" className="text-white fw-semibold">
-              Order
+            <Nav.Link as={NavLink} to="/foods" className="text-white fw-semibold">
+              Food
             </Nav.Link>
+            
 
             {user.id ? (
               <>
+
+              <Nav.Link as={NavLink} to="/order" className="text-white fw-semibold">
+              Order
+            </Nav.Link>
+
                 <Nav.Link as={NavLink} to="/logout" className="text-white fw-semibold">
                   Logout
                 </Nav.Link>
