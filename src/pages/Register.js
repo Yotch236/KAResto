@@ -11,6 +11,7 @@ export default function Register() {
   const [FirstName, setFirstName] = useState("");
   const [LastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [password, setPassword] = useState("");
   const [isActive, setIsActive] = useState(false);
 
@@ -116,7 +117,7 @@ export default function Register() {
                   <Form.Group>
                     <Form.Label>Password</Form.Label>
                     <Form.Control
-                      type="password"
+                      type={[showPassword ? "text": "password"]}
                       placeholder="Enter Password"
                       required
                       value={password}

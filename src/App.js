@@ -7,6 +7,7 @@ import Login from './pages/Login';
 import Logout from './pages/Logout';
 import Register from './pages/Register';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import RestaurantSpinner from './components/RestaurantSpinner';
 import './App.css';
 
 function App() {
@@ -14,6 +15,7 @@ function App() {
     id: null,
     isAdmin: null,
   });
+  const [loading,setLoading] = useState(true);
 
   const unsetUser = () => {
     localStorage.clear();
@@ -37,13 +39,19 @@ function App() {
         } else {
           unsetUser();
         }
-      });
+        setLoading(false);
+      })
+      .catch(() => setLoading(false));
   }, []);
 
   useEffect(() => {
     console.log(user);
     console.log(localStorage);
   }, [user]);
+
+  if(loading){
+    return <RestaurantSpinner />;
+  }
 
   return (
     <UserProvider value={{ user, setUser, unsetUser }}>

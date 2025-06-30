@@ -51,9 +51,6 @@ export default function AppNavBar() {
                 <Nav.Link as={NavLink} to="/login" className="text-white fw-semibold">
                   Login
                 </Nav.Link>
-                <Nav.Link as={NavLink} to="/register" className="text-white fw-semibold">
-                  Register
-                </Nav.Link>
               </>
             )}
           </Nav>

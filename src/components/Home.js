@@ -12,7 +12,7 @@ export default function Home() {
         if (user && user.id !== null) {
             navigate('/order'); // user is logged in
         } else {
-            navigate('/register'); // user is not logged in
+            navigate('/login'); // user is not logged in
         }
     };
 

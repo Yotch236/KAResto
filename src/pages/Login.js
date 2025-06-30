@@ -176,6 +176,11 @@ export default function Login(){
                                         Login
                                     </Button>
                                 }
+
+                                <div className='text-center mt-3'>
+                                    <span className='fw-semibold'>Don't have an account?</span>
+                                    <a href="/register" className='fw-semibold text-success'> Register</a>
+                                </div>
                             </Form>
                         </div>
                     </Col>

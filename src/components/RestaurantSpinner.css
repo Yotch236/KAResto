@@ -1,0 +1,28 @@
+.spinner-wrapper {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  font-family: 'Comic Sans MS', cursive, sans-serif;
+  color: #ff9900;
+  background-color: #fff8e1;
+}
+
+.food-spinner {
+  font-size: 10rem; /* ⬅️ Increased from 5rem to 10rem */
+  animation: bounce 1.5s infinite;
+  margin-bottom: 20px;
+}
+
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-20px);
+  }
+  80% {
+    transform: translateY(-10px);
+  }
+}
