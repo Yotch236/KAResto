@@ -10,11 +10,35 @@
 }
 
 .food-spinner {
-  font-size: 10rem; /* ⬅️ Increased from 5rem to 10rem */
+  font-size: 10rem;
   animation: bounce 1.5s infinite;
   margin-bottom: 20px;
 }
 
+.spinner-wrapper p {
+  font-size: 1.5rem;
+  font-weight: bold;
+  letter-spacing: 1px;
+  color: #ff6600;
+  text-shadow: 1px 1px 2px #fff;
+  animation: fadeIn 2s ease-in-out infinite alternate;
+  margin: 0;
+  text-align: center;
+}
+
+/* Animation for text glow */
+@keyframes fadeIn {
+  from {
+    opacity: 0.6;
+    transform: scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1.02);
+  }
+}
+
+/* Bouncing emoji */
 @keyframes bounce {
   0%, 100% {
     transform: translateY(0);
