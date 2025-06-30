@@ -11,6 +11,7 @@ export default function Login(){
     
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [showPassword, setShowPassword] = useState(false);
     const [isActive, setIsActive] = useState(true);
 
     useEffect(() => {
@@ -158,7 +159,7 @@ export default function Login(){
                                 <Form.Group className="mb-3">
                                     <Form.Label>Password</Form.Label>
                                     <Form.Control 
-                                        type="password" 
+                                        type={showPassword ? "text" : "password"} 
                                         placeholder="Password" 
                                         required
                                         value={password}
