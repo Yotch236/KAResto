@@ -9,6 +9,7 @@ import Register from './pages/Register';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import RestaurantSpinner from './components/RestaurantSpinner';
 import Error from './pages/ErrorPage';
+import FoodPage from './pages/FoodPage';
 import './App.css';
 
 function App() {
@@ -64,6 +65,7 @@ function App() {
              <Route path="/register" element={<Register />} />
              <Route path="/login" element={<Login />} />
              <Route path="/logout" element={<Logout />} />
+             <Route path="/foods" element={<FoodPage />} />
              <Route path="*" element={<Error />} />
           </Routes>
         </Container>
