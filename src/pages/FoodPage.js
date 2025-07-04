@@ -1,4 +1,3 @@
-// src/pages/FoodPage.js
 import { useEffect, useState } from "react";
 import { Container, Row, Col, Form, Card, Button } from "react-bootstrap";
 import axios from "axios";
@@ -82,7 +81,7 @@ export default function FoodPage() {
   src={
     food.image.startsWith("http")
       ? food.image
-      : `https://karestoapi.onrender.com/${food.image}`
+      : `https://karestoapi.onrender.com${food.image}`
   }
   alt={food.name}
   style={{ height: "180px", objectFit: "cover" }}

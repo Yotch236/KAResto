@@ -42,7 +42,7 @@ function App() {
           unsetUser();
         }
         setLoading(false);
-      }, 100)
+      })
       .catch(() => setLoading(false));
   }, []);
 
