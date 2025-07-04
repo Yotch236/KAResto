@@ -41,7 +41,7 @@ function App() {
           unsetUser();
         }
         setLoading(false);
-      })
+      }, 700)
       .catch(() => setLoading(false));
   }, []);
 
