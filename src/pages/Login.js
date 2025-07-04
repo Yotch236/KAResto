@@ -107,7 +107,7 @@ export default function Login(){
 
             setUser({ id: data._id, isAdmin: data.isAdmin });
 
-            setTimeout(() => navigate("/home"), 500);
+            setTimeout(() => navigate("/foods"), 500);
         } else {
             console.error("User details response missing _id:", data);
             Swal.fire({
@@ -129,13 +129,13 @@ export default function Login(){
 
     useEffect(() => {
         if(user.id !== null){
-            navigate("/home");
+            navigate("/foods");
         }
     },[user, navigate]);
 
     return(
         (user.id !== null) ?
-           <Navigate to = "/home" />
+           <Navigate to = "/foods" />
         :
         <div id="wrapper" className="d-flex justify-content-center align-items-center m-0 p-0 vh-100">
             <Container>
