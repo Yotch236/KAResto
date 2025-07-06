@@ -3,6 +3,7 @@ import {Row,Col,Container,Form,Button} from 'react-bootstrap';
 import {Navigate, useNavigate} from 'react-router-dom'; // Removed Link as it's not used
 import UserContext from '../context/UserContext';
 import Swal from 'sweetalert2'; // Keep this one, remove the require below
+import {FaEye, FaEyeSlash} from 'react-icons/fa';
 import '../index.css';
 
 export default function Login(){
@@ -158,14 +159,29 @@ export default function Login(){
 
                                 <Form.Group className="mb-3">
                                     <Form.Label>Password</Form.Label>
-                                    <Form.Control 
-                                        type={showPassword ? "text" : "password"} 
-                                        placeholder="Password" 
-                                        required
-                                        value={password}
-                                        onChange={(e) => setPassword(e.target.value)}
-                                    />
+                                    <div className='input-group'>
+                                        <Form.Control
+                                            type={showPassword ? "text": "password"}
+                                            placeholder='Password'
+                                            required
+                                            value={password}
+                                            onChange={(e) => setPassword(e.target.value)}
+                                        />
+                                        <Button
+                                            variant="outline-secondary"
+                                            onClick={() => setShowPassword(!showPassword)}
+                                            type="button"
+                                        >
+                                        {showPassword ? <FaEyeSlash /> : <FaEye />}
+                                        </Button>
+                                    </div>
                                 </Form.Group>
+
+                                <div className='text-start mt-1 mb-2'>
+                                    <a href="/forgot-password" className='text-decoration-none text-primary'>
+                                        Forgot Password?
+                                    </a>
+                                </div>
                                 
                                 { isActive ? 
                                     <Button type="submit" id="loginBtn" className="bg-success fw-semibold w-100 mt-3">

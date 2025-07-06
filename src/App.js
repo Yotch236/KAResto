@@ -10,6 +10,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import RestaurantSpinner from './components/RestaurantSpinner';
 import Error from './pages/ErrorPage';
 import FoodPage from './pages/FoodPage';
+import ForgotPassword from './pages/ForgotPassword';
 import './App.css';
 
 function App() {
@@ -66,6 +67,7 @@ function App() {
              <Route path="/login" element={<Login />} />
              <Route path="/logout" element={<Logout />} />
              <Route path="/foods" element={<FoodPage />} />
+             <Route path='/forgot-password' element={<ForgotPassword />} />
              <Route path="*" element={<Error />} />
           </Routes>
         </Container>
