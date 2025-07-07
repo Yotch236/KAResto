@@ -10,7 +10,7 @@ export default function Home() {
 
     const handleOrderClick = () => {
         if (user && user.id !== null) {
-            navigate('/order'); // user is logged in
+            navigate('/foods'); // user is logged in
         } else {
             navigate('/login'); // user is not logged in
         }
