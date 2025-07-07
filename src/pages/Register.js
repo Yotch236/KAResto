@@ -26,6 +26,35 @@ export default function Register() {
   function registerUser(e) {
     e.preventDefault();
 
+     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  if (!emailRegex.test(email)) {
+    Swal.fire({
+      icon: "warning",
+      title: "Invalid Email",
+      text: "Please enter a valid email address.",
+    });
+    return;
+  }
+
+  if (password.length < 8) {
+    Swal.fire({
+      icon: "warning",
+      title: "Weak Password",
+      text: "Password should be at least 8 characters long.",
+    });
+    return;
+  }
+
+    if(password.length < 8) {
+      Swal.fire({
+        icon: "warning",
+        title: "Weak Password",
+        text: "Password should be at least 8 characters long.",
+      });
+      return;
+    }
+
     fetch(`https://karestoapi.onrender.com/users/register`, {
       method: 'POST',
       headers: {
@@ -112,6 +141,12 @@ export default function Register() {
                       onChange={(e) => setEmail(e.target.value)}
                       className="mb-3"
                     />
+
+                    {email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) && (
+                    <Form.Text className="text-danger">
+                      Please enter a valid email address.
+                    </Form.Text>
+)}
                   </Form.Group>
 
                   <Form.Group>
@@ -124,6 +159,20 @@ export default function Register() {
                       onChange={(e) => setPassword(e.target.value)}
                       className="mb-3"
                     />
+
+                     <Button
+                        variant="outline-secondary"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="ms-2"
+                      >
+      {showPassword ? "Hide" : "Show"}
+    </Button>
+
+                    {password && password.length > 0 && password.length < 8 && (
+                    <Form.Text className="text-danger">
+                      Password should be at least 8 characters long.
+                    </Form.Text>
+)}
                   </Form.Group>
 
                   <Button type="submit" className="w-100 mt-3" variant={isActive ? "primary" : "success"} disabled={!isActive}>
