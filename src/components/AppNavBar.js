@@ -39,7 +39,7 @@ export default function AppNavBar() {
               <>
 
               <Nav.Link as={NavLink} to="/order" className="text-white fw-semibold">
-              Order
+              Orders
             </Nav.Link>
 
                 <Nav.Link as={NavLink} to="/logout" className="text-white fw-semibold">

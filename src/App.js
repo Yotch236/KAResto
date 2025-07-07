@@ -9,7 +9,10 @@ import Register from './pages/Register';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import RestaurantSpinner from './components/RestaurantSpinner';
 import Error from './pages/ErrorPage';
+import { ToastContainer} from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import FoodPage from './pages/FoodPage';
+import CartPage from './pages/CartPage';
 import './App.css';
 
 function App() {
@@ -66,9 +69,22 @@ function App() {
              <Route path="/login" element={<Login />} />
              <Route path="/logout" element={<Logout />} />
              <Route path="/foods" element={<FoodPage />} />
+             <Route path="/cart" element={<CartPage />} />
              <Route path="*" element={<Error />} />
           </Routes>
         </Container>
+
+           <ToastContainer
+              position="bottom-right"
+              autoClose={2000}
+              hideProgressBar={false}
+              newestOnTop
+              closeOnClick
+              pauseOnFocusLoss
+              draggable
+              pauseOnHover
+              theme="light"
+      />
       </Router>
     </UserProvider>
   );
