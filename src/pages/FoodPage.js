@@ -1,8 +1,8 @@
 import { useEffect, useState, useContext } from "react";
 import { Container, Row, Col, Form, Card, Button } from "react-bootstrap";
 import axios from "axios";
-import { toast} from 'react-toastify';
-import '../pages/FoodPage.css';
+import { toast } from "react-toastify";
+import "../pages/FoodPage.css";
 import { useNavigate } from "react-router-dom";
 import UserContext from "../context/UserContext";
 
@@ -27,17 +27,17 @@ export default function FoodPage() {
   }, []);
 
   const handleFilter = () => {
-    let filtered = foods;
+    let filtered = [...foods];
 
     if (category !== "All") {
       filtered = filtered.filter((food) => food.category === category);
     }
 
-    if (minPrice !== "") {
+    if (!isNaN(parseFloat(minPrice))) {
       filtered = filtered.filter((food) => food.price >= parseFloat(minPrice));
     }
 
-    if (maxPrice !== "") {
+    if (!isNaN(parseFloat(maxPrice))) {
       filtered = filtered.filter((food) => food.price <= parseFloat(maxPrice));
     }
 
@@ -49,16 +49,22 @@ export default function FoodPage() {
       navigate("/login");
     } else {
       axios
-        .post("https://karestoapi.onrender.com/cart/add-to-cart", {
-          userId: user.id,
-          foodId,
-        })
-        .then(() => {
-          toast.success("Item added to cart!");
+        .post(
+          "https://karestoapi.onrender.com/cart/add-to-cart",
+          { foodId, quantity: 1 },
+          {
+            headers: {
+              Authorization: user.token,
+            },
+          }
+        )
+        .then((res) => {
+          toast.success(res.data.message || "Item added to cart!");
         })
         .catch((err) => {
-          console.error("Add to cart failed:", err);
-          toast.error("Failed to add item to cart.");
+          const errorMessage =
+            err.response?.data?.message || err.response?.data?.error || "Failed to add item to cart.";
+          toast.error(errorMessage);
         });
     }
   };
@@ -110,9 +116,11 @@ export default function FoodPage() {
                 <Card.Img
                   variant="top"
                   src={
-                    food.image.startsWith("http")
-                      ? food.image
-                      : `https://karestoapi.onrender.com${food.image}`
+                    food.image
+                      ? food.image.startsWith("http")
+                        ? food.image
+                        : `https://karestoapi.onrender.com${food.image}`
+                      : "https://via.placeholder.com/300x180?text=No+Image"
                   }
                   alt={food.name}
                   style={{ height: "180px", objectFit: "cover" }}
@@ -142,10 +150,12 @@ export default function FoodPage() {
 
       {user && user.id && (
         <Button
-           variant="success"
-           className="floating-cart"
-           onClick={() => navigate("/cart")}
-        >🛒</Button>
+          variant="success"
+          className="floating-cart"
+          onClick={() => navigate("/cart")}
+        >
+          🛒
+        </Button>
       )}
     </Container>
   );

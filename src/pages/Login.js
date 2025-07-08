@@ -101,14 +101,14 @@ export default function Login(){
         if(data._id){
             Swal.fire({
                 icon: "success",
-                title: data.isAdmin ? "Welcome Admin" : `Welcome, ${data.firstName || 'User'}`,
+                title: data.isAdmin ? "Welcome Admin" : `Welcome, ${data.FirstName + " " + data.LastName|| 'User'}`,
                 showConfirmButton: false,
                 timer: 1500
             });
 
             setUser({ id: data._id, isAdmin: data.isAdmin });
 
-            setTimeout(() => navigate("/foods"), 500);
+            setTimeout(() => navigate("/foods"), 1000);
         } else {
             console.error("User details response missing _id:", data);
             Swal.fire({

@@ -6,55 +6,59 @@ import Home from './components/Home';
 import Login from './pages/Login';
 import Logout from './pages/Logout';
 import Register from './pages/Register';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import RestaurantSpinner from './components/RestaurantSpinner';
-import Error from './pages/ErrorPage';
-import { ToastContainer} from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
 import FoodPage from './pages/FoodPage';
 import CartPage from './pages/CartPage';
+import Error from './pages/ErrorPage';
+import RestaurantSpinner from './components/RestaurantSpinner';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import './App.css';
 
 function App() {
   const [user, setUser] = useState({
     id: null,
     isAdmin: null,
+    token: localStorage.getItem('token'),
   });
-  const [loading,setLoading] = useState(true);
+
+  const [loading, setLoading] = useState(true);
 
   const unsetUser = () => {
     localStorage.clear();
-    setUser({ id: null, isAdmin: null });
+    setUser({ id: null, isAdmin: null, token: null });
   };
 
   useEffect(() => {
-    fetch(`https://karestoapi.onrender.com/users/details`, {
-      method: 'GET',
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem('token')}`,
-      },
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.auth !== 'Failed') {
-          setUser({
-            id: data._id,
-            isAdmin: data.isAdmin,
-          });
-        } else {
-          unsetUser();
-        }
-        setLoading(false);
+    const token = localStorage.getItem('token');
+
+    if (token) {
+      fetch(`https://karestoapi.onrender.com/users/details`, {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       })
-      .catch(() => setLoading(false));
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.auth !== 'Failed') {
+            setUser({
+              id: data._id,
+              isAdmin: data.isAdmin,
+              token: token,
+            });
+          } else {
+            unsetUser();
+          }
+          setLoading(false);
+        })
+        .catch(() => setLoading(false));
+    } else {
+      setLoading(false);
+    }
   }, []);
 
-  useEffect(() => {
-    console.log(user);
-    console.log(localStorage);
-  }, [user]);
-
-  if(loading){
+  if (loading) {
     return <RestaurantSpinner />;
   }
 
@@ -64,27 +68,30 @@ function App() {
         <AppNavBar />
         <Container className="mt-4">
           <Routes>
-             <Route path ="/" element={<Home />} /> 
-             <Route path="/register" element={<Register />} />
-             <Route path="/login" element={<Login />} />
-             <Route path="/logout" element={<Logout />} />
-             <Route path="/foods" element={<FoodPage />} />
-             <Route path="/cart" element={<CartPage />} />
-             <Route path="*" element={<Error />} />
+            <Route path="/" element={<Home />} />
+            <Route path="/register" element={<Register />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/logout" element={<Logout />} />
+            <Route path="/foods" element={<FoodPage />} />
+            <Route
+              path="/cart"
+              element={user.id ? <CartPage /> : <Navigate to="/login" />}
+            />
+            <Route path="*" element={<Error />} />
           </Routes>
         </Container>
 
-           <ToastContainer
-              position="bottom-right"
-              autoClose={2000}
-              hideProgressBar={false}
-              newestOnTop
-              closeOnClick
-              pauseOnFocusLoss
-              draggable
-              pauseOnHover
-              theme="light"
-      />
+        <ToastContainer
+          position="bottom-right"
+          autoClose={2000}
+          hideProgressBar={false}
+          newestOnTop
+          closeOnClick
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+          theme="light"
+        />
       </Router>
     </UserProvider>
   );
