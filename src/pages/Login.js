@@ -1,201 +1,183 @@
-import {useState, useEffect, useContext} from 'react';
-import {Row,Col,Container,Form,Button} from 'react-bootstrap';
-import {Navigate, useNavigate} from 'react-router-dom'; // Removed Link as it's not used
+import { useState, useEffect, useContext } from 'react';
+import { Row, Col, Container, Form, Button } from 'react-bootstrap';
+import { Navigate, useNavigate, useLocation } from 'react-router-dom';
 import UserContext from '../context/UserContext';
-import Swal from 'sweetalert2'; // Keep this one, remove the require below
-import {FaEye, FaEyeSlash} from 'react-icons/fa';
+import Swal from 'sweetalert2';
+import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import '../index.css';
 
-export default function Login(){
-    const {user, setUser} = useContext(UserContext);
-    const navigate = useNavigate();
-    
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
-    const [showPassword, setShowPassword] = useState(false);
-    const [isActive, setIsActive] = useState(true);
+export default function Login() {
+  const { user, setUser } = useContext(UserContext);
+  const navigate = useNavigate();
+  const location = useLocation();
+  const from = location.state?.from?.pathname || "/foods"; // fallback if no previous path
 
-    useEffect(() => {
-        // This useEffect now also updates isActive based on email and password presence
-        if (email.length > 0 && password.length > 0) {
-            setIsActive(true);
-        } else {
-            setIsActive(false);
-        }
-    }, [email, password]); // Depend on email and password changes
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [isActive, setIsActive] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
+  useEffect(() => {
+    setIsActive(email.length > 0 && password.length > 0);
+  }, [email, password]);
 
-    function authenticate(e){
-        e.preventDefault();
-        fetch('https://karestoapi.onrender.com/users/login', {
-            method: 'POST',
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                email: email,
-                password: password
-            })
-        })
-        .then(res => {
-            if (!res.ok) { // Check for non-2xx status codes from the login endpoint
-                return res.json().then(errorData => {
-                    // Propagate the error with more details
-                    throw new Error(errorData.message || "Please Enter a Correct Email or Password.");
-                });
-            }
-            return res.json();
-        })
-        .then(data => {
-            if(data.access !== undefined){
-                console.log("Login successful, token:", data.access);
-                localStorage.setItem('token', data.access);
+  function authenticate(e) {
+    e.preventDefault();
+    setIsSubmitting(true);
 
-                retrieveUserDetails(data.access); // Pass the token to retrieve user details
-
-                setEmail('');
-                setPassword('');
-            } else if (data.message === "Incorrect email or password" || data.message === "Incoorrect email or password") {
-                // Corrected typo "Incoorrect" to "Incorrect" for robustness
-                Swal.fire({
-                    icon: "error",
-                    title: "Login Failed",
-                    text: "Incorrect email or password. Please try again.",
-                });
-            } else {
-                // Catch any other unexpected messages from the login endpoint
-                Swal.fire({
-                    icon: "error",
-                    title: "Login Failed",
-                    text: data.message || "An unexpected error occurred during login. Please try again later.",
-                });
-            }
-        })
-        .catch(error => {
-            console.error("Authentication fetch error:", error);
-            Swal.fire({
-                icon: "error",
-                title: "Email or Password Incorrect",
-                text: ` ${error.message}`,
-            });
-        });
-    }
-
-  function retrieveUserDetails(token){
-    fetch("https://karestoapi.onrender.com/users/details", {
-        headers: {
-            Authorization: `Bearer ${token}`
-        }
+    fetch('https://karestoapi.onrender.com/users/login', {
+      method: 'POST',
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password })
     })
     .then(res => {
-        if (!res.ok) {
-            console.error("HTTP error during user details retrieval:", res.status, res.statusText);
-            return res.json().then(errorData => {
-                throw new Error(errorData.message || "Failed to fetch user details with non-OK status");
-            });
-        }
-        return res.json();
+      if (!res.ok) {
+        return res.json().then(errorData => {
+          throw new Error(errorData.message || "Incorrect email or password.");
+        });
+      }
+      return res.json();
     })
     .then(data => {
-        console.log("User details received:", data); 
-        if(data._id){
-            Swal.fire({
-                icon: "success",
-                title: data.isAdmin ? "Welcome Admin" : `Welcome, ${data.FirstName + " " + data.LastName|| 'User'}`,
-                showConfirmButton: false,
-                timer: 1500
-            });
-
-            setUser({ id: data._id, isAdmin: data.isAdmin });
-
-            setTimeout(() => navigate("/foods"), 1000);
-        } else {
-            console.error("User details response missing _id:", data);
-            Swal.fire({
-                icon: "error",
-                title: "Error",
-                text: "Failed to retrieve user details: User ID not found in response.",
-            });
-        }
+      if (data.access) {
+        localStorage.setItem('token', data.access);
+        retrieveUserDetails(data.access);
+        setEmail('');
+        setPassword('');
+      } else {
+        Swal.fire({
+          icon: "error",
+          title: "Login Failed",
+          text: "Unexpected login response.",
+        });
+        setIsSubmitting(false);
+      }
     })
     .catch(error => {
-        console.error("Error fetching user details:", error);
-        Swal.fire({
-            icon: "error",
-            title: "Error",
-            text: `Error fetching user details: ${error.message || "An unknown network error occurred"}`,
-        });
+      const isNetworkError = error.message.includes("Failed to fetch");
+      Swal.fire({
+        icon: "error",
+        title: isNetworkError ? "Server Error" : "Login Failed",
+        text: isNetworkError
+          ? "Cannot connect to the server. Try again later."
+          : error.message,
+      });
+      setIsSubmitting(false);
     });
-}
+  }
 
-    useEffect(() => {
-        if(user.id !== null){
-            navigate("/foods");
-        }
-    },[user, navigate]);
+  function retrieveUserDetails(token) {
+    fetch("https://karestoapi.onrender.com/users/details", {
+      headers: { Authorization: `Bearer ${token}` }
+    })
+    .then(res => {
+      if (!res.ok) {
+        return res.json().then(errorData => {
+          throw new Error(errorData.message || "Failed to fetch user details.");
+        });
+      }
+      return res.json();
+    })
+    .then(data => {
+      if (data._id) {
+        Swal.fire({
+          icon: "success",
+          title: data.isAdmin ? "Welcome Admin" : `Welcome, ${data.FirstName + " " + data.LastName || 'User'}`,
+          showConfirmButton: false,
+          timer: 1500
+        });
 
-    return(
-        (user.id !== null) ?
-           <Navigate to = "/foods" />
-        :
-        <div id="wrapper" className="d-flex justify-content-center align-items-center m-0 p-0 vh-100">
-            <Container>
-                <Row className="justify-content-center">
-                    <Col xs={12} md={6} lg={4}>
-                        <div className="p-4 shadow rounded bg-white">
-                            <Form onSubmit={(e) => authenticate(e)}>
-                                <h1 className="my-5 text-center">Login</h1>
-                                <Form.Group>
-                                    <Form.Label>Email address</Form.Label>
-                                    <Form.Control 
-                                        type="email" 
-                                        placeholder="Enter email" 
-                                        required
-                                        value={email}
-                                        className="mb-3"
-                                        onChange={(e) => setEmail(e.target.value)}
-                                    />
-                                </Form.Group>
+        setUser({ id: data._id, isAdmin: data.isAdmin, token });
 
-                                <Form.Group className="mb-3">
-                                    <Form.Label>Password</Form.Label>
-                                    <div className='input-group'>
-                                        <Form.Control
-                                            type={showPassword ? "text": "password"}
-                                            placeholder='Password'
-                                            required
-                                            value={password}
-                                            onChange={(e) => setPassword(e.target.value)}
-                                        />
-                                        <Button
-                                            variant="outline-secondary"
-                                            onClick={() => setShowPassword(!showPassword)}
-                                            type="button"
-                                        >
-                                        {showPassword ? <FaEyeSlash /> : <FaEye />}
-                                        </Button>
-                                    </div>
-                                </Form.Group>
-                                
-                                { isActive ? 
-                                    <Button type="submit" id="loginBtn" className="bg-success fw-semibold w-100 mt-3">
-                                        Login
-                                    </Button>
-                                    : 
-                                    <Button variant="danger" type="submit" id="loginBtn" className="w-100 mt-3" disabled>
-                                        Login
-                                    </Button>
-                                }
+        setTimeout(() => navigate(from), 1000);
+      } else {
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: "User ID missing from server response.",
+        });
+        setIsSubmitting(false);
+      }
+    })
+    .catch(error => {
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: error.message || "Error retrieving user info",
+      });
+      setIsSubmitting(false);
+    });
+  }
 
-                                <div className='text-center mt-3'>
-                                    <span className='fw-semibold'>Don't have an account?</span>
-                                    <a href="/register" className='fw-semibold text-success'> Register</a>
-                                </div>
-                            </Form>
-                        </div>
-                    </Col>
-                </Row>
-            </Container>
-        </div>     
-    );
+  // Prevent forced redirect to /foods on every login
+  useEffect(() => {
+    if (user.id !== null) {
+      navigate(from);
+    }
+  }, [user, from, navigate]);
+
+  return user.id !== null ? (
+    <Navigate to={from} />
+  ) : (
+    <div id="wrapper" className="d-flex justify-content-center align-items-center vh-100">
+      <Container>
+        <Row className="justify-content-center">
+          <Col xs={12} md={6} lg={4}>
+            <div className="p-4 shadow rounded bg-white">
+              <Form onSubmit={authenticate}>
+                <h1 className="my-5 text-center">Login</h1>
+
+                <Form.Group>
+                  <Form.Label>Email address</Form.Label>
+                  <Form.Control
+                    type="email"
+                    placeholder="Enter email"
+                    required
+                    value={email}
+                    className="mb-3"
+                    onChange={(e) => setEmail(e.target.value)}
+                  />
+                </Form.Group>
+
+                <Form.Group className="mb-3">
+                  <Form.Label>Password</Form.Label>
+                  <div className='input-group'>
+                    <Form.Control
+                      type={showPassword ? "text" : "password"}
+                      placeholder='Password'
+                      required
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                    />
+                    <Button
+                      variant="outline-secondary"
+                      onClick={() => setShowPassword(!showPassword)}
+                      type="button"
+                    >
+                      {showPassword ? <FaEyeSlash /> : <FaEye />}
+                    </Button>
+                  </div>
+                </Form.Group>
+
+                <Button
+                  type="submit"
+                  className="w-100 mt-3 fw-semibold"
+                  variant={isActive ? "success" : "danger"}
+                  disabled={!isActive || isSubmitting}
+                >
+                  {isSubmitting ? "Logging in..." : "Login"}
+                </Button>
+
+                <div className='text-center mt-3'>
+                  <span className='fw-semibold'>Don't have an account?</span>
+                  <a href="/register" className='fw-semibold text-success'> Register</a>
+                </div>
+              </Form>
+            </div>
+          </Col>
+        </Row>
+      </Container>
+    </div>
+  );
 }

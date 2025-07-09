@@ -44,31 +44,30 @@ export default function FoodPage() {
     setFilteredFoods(filtered);
   };
 
-  const handleAddToCart = (foodId) => {
-    if (!user || !user.id) {
-      navigate("/login");
-    } else {
-      axios
-        .post(
-          "https://karestoapi.onrender.com/cart/add-to-cart",
-          { foodId, quantity: 1 },
-          {
-            headers: {
-              Authorization: user.token,
-            },
-          }
-        )
-        .then((res) => {
-          toast.success(res.data.message || "Item added to cart!");
-        })
-        .catch((err) => {
-          const errorMessage =
-            err.response?.data?.message || err.response?.data?.error || "Failed to add item to cart.";
-          toast.error(errorMessage);
-        });
-    }
-  };
-
+ const handleAddToCart = (foodId) => {
+  if (!user || !user.id) {
+    navigate("/login");
+  } else {
+    axios
+      .post(
+        "https://karestoapi.onrender.com/cart/add-to-cart",
+        { foodId, quantity: 1 },
+        {
+          headers: {
+            Authorization: `Bearer ${user.token}`, // ✅ FIXED
+          },
+        }
+      )
+      .then((res) => {
+        toast.success(res.data.message || "Item added to cart!");
+      })
+      .catch((err) => {
+        const errorMessage =
+          err.response?.data?.message || err.response?.data?.error || "Failed to add item to cart.";
+        toast.error(errorMessage);
+      });
+  }
+};
   const uniqueCategories = ["All", ...new Set(foods.map((food) => food.category))];
 
   return (
