@@ -1,5 +1,5 @@
 import { useEffect, useState, useContext } from "react";
-import { Container, Row, Col, Card, Button, Spinner } from "react-bootstrap";
+import { Container,Row, Col,Card, Button} from "react-bootstrap";
 import axios from "axios";
 import { toast } from "react-toastify";
 import UserContext from "../context/UserContext";
@@ -18,7 +18,7 @@ export default function CartPage() {
     } else {
       fetchCart();
     }
-  }, [user]);
+  }, [user, navigate, location]);
 
   const fetchCart = () => {
     setLoading(true);
@@ -51,6 +51,7 @@ export default function CartPage() {
   const handleQuantityChange = (foodId, newQty) => {
     if (newQty < 1) return;
 
+    setLoading(true);
     axios
       .patch(
         `https://karestoapi.onrender.com/cart/update/${foodId}`,
@@ -64,10 +65,15 @@ export default function CartPage() {
       .catch((err) => {
         const msg = err.response?.data?.message || "Failed to update quantity.";
         toast.error(msg);
-      });
+      })
+      .finally(() => setLoading(false));
   };
 
   const handleClearCart = () => {
+    const confirmClear = window.confirm("Are you sure you want to clear the cart?");
+    if (!confirmClear) return;
+
+    setLoading(true);
     axios
       .delete("https://karestoapi.onrender.com/cart/clear", {
         headers: { Authorization: `Bearer ${user.token}` },
@@ -76,23 +82,22 @@ export default function CartPage() {
         toast.success(res.data.message || "Cart cleared.");
         setCartItems([]);
       })
-      .catch(() => toast.error("Failed to clear cart."));
+      .catch(() => toast.error("Failed to clear cart."))
+      .finally(() => setLoading(false));
   };
 
   const calculateTotal = () => {
     return cartItems.reduce(
-      (sum, item) => sum + item.foodId.price * item.quantity,
+      (sum, item) => sum + (item.foodId?.price || 0) * item.quantity,
       0
     );
   };
 
-  if (loading) {
-    return (
-      <Container className="text-center mt-5">
-        <Spinner animation="border" variant="success" />
-      </Container>
-    );
-  }
+  const handlePlaceOrder = () => {
+    toast.success("Order placed!");
+    // Example: redirect to order summary
+    navigate("/order");
+  };
 
   return (
     <Container className="my-4">
@@ -101,73 +106,46 @@ export default function CartPage() {
       {cartItems.length > 0 ? (
         <>
           <Row>
-            {cartItems.map((item) => {
-              const imageUrl = item.foodId?.image
-                ? item.foodId.image.startsWith("http")
-                  ? item.foodId.image
-                  : `https://karestoapi.onrender.com${
-                      item.foodId.image.startsWith("/")
-                        ? item.foodId.image
-                        : "/" + item.foodId.image
-                    }`
-                : "https://via.placeholder.com/300x180?text=No+Image";
-
-              return (
-                <Col md={4} key={item.foodId._id} className="mb-4">
-                  <Card>
-                    <Card.Img
-                      variant="top"
-                      src={imageUrl}
-                      alt={item.foodId.name || "Food image"}
-                      style={{ height: "180px", objectFit: "cover" }}
-                      onError={(e) => {
-                        e.target.onerror = null;
-                        e.target.src =
-                          "https://via.placeholder.com/300x180?text=No+Image";
-                      }}
-                    />
-                    <Card.Body>
-                      <Card.Title>{item.foodId.name || "Unnamed Food"}</Card.Title>
-                      <Card.Text>₱{item.foodId.price.toFixed(2)}</Card.Text>
-                      <div className="d-flex justify-content-between align-items-center mb-2">
-                        <Button
-                          variant="outline-secondary"
-                          size="sm"
-                          onClick={() =>
-                            handleQuantityChange(
-                              item.foodId._id,
-                              item.quantity - 1
-                            )
-                          }
-                        >
-                          −
-                        </Button>
-                        <span>{item.quantity}</span>
-                        <Button
-                          variant="outline-secondary"
-                          size="sm"
-                          onClick={() =>
-                            handleQuantityChange(
-                              item.foodId._id,
-                              item.quantity + 1
-                            )
-                          }
-                        >
-                          +
-                        </Button>
-                      </div>
+            {cartItems.map((item) => (
+              <Col md={4} key={item.foodId._id} className="mb-4">
+                <Card>
+                  <Card.Body>
+                    <Card.Title className="text-center">{item.foodId?.name || "Unnamed Food"}</Card.Title>
+                    <Card.Text className="text-center">₱{item.foodId?.price?.toFixed(2) || "0.00"}</Card.Text>
+                    <Card.Text className="text-center">
+                      Subtotal: ₱{((item.foodId?.price || 0) * item.quantity).toFixed(2)}
+                    </Card.Text>
+                    <div className="d-flex justify-content-between align-items-center mb-2">
                       <Button
-                        variant="success"
-                        className="w-100 fw-semibold"
-                        onClick={() => handleRemove(item.foodId._id)}
+                        variant="outline-secondary"
+                        size="sm"
+                        disabled={loading}
+                        onClick={() => handleQuantityChange(item.foodId._id, item.quantity - 1)}
                       >
-                        Remove
+                        −
                       </Button>
-                    </Card.Body>
-                  </Card>
-                </Col>
-              );
-            })}
+                      <span>{item.quantity}</span>
+                      <Button
+                        variant="outline-secondary"
+                        size="sm"
+                        disabled={loading}
+                        onClick={() => handleQuantityChange(item.foodId._id, item.quantity + 1)}
+                      >
+                        +
+                      </Button>
+                    </div>
+                    <Button
+                      variant="success"
+                      className="w-100 fw-semibold"
+                      disabled={loading}
+                      onClick={() => handleRemove(item.foodId._id)}
+                    >
+                      Remove
+                    </Button>
+                  </Card.Body>
+                </Card>
+              </Col>
+            ))}
           </Row>
 
           <div className="text-end mt-3 me-2">
@@ -175,20 +153,24 @@ export default function CartPage() {
             <Button
               variant="outline-danger"
               className="me-2"
+              disabled={loading}
               onClick={handleClearCart}
             >
               Clear Cart
             </Button>
             <Button
               variant="success"
-              onClick={() => toast.success("Order placed!")}
+              disabled={loading}
+              onClick={handlePlaceOrder}
             >
               Place Order
             </Button>
           </div>
         </>
       ) : (
-        <p className="text-center">Your cart is empty.</p>
+        <p className="text-center text-muted fs-5 mt-5">
+          🛒 Your cart is empty. Add some delicious meals!
+        </p>
       )}
     </Container>
   );
