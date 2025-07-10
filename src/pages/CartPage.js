@@ -80,7 +80,10 @@ export default function CartPage() {
   };
 
   const calculateTotal = () => {
-    return cartItems.reduce((sum, item) => sum + item.foodId.price * item.quantity, 0);
+    return cartItems.reduce(
+      (sum, item) => sum + item.foodId.price * item.quantity,
+      0
+    );
   };
 
   if (loading) {
@@ -99,11 +102,14 @@ export default function CartPage() {
         <>
           <Row>
             {cartItems.map((item) => {
-
               const imageUrl = item.foodId?.image
                 ? item.foodId.image.startsWith("http")
                   ? item.foodId.image
-                  : `https://karestoapi.onrender.com${item.foodId.image.startsWith("/") ? item.foodId.image : "/" + item.foodId.image}`
+                  : `https://karestoapi.onrender.com${
+                      item.foodId.image.startsWith("/")
+                        ? item.foodId.image
+                        : "/" + item.foodId.image
+                    }`
                 : "https://via.placeholder.com/300x180?text=No+Image";
 
               return (
@@ -114,6 +120,11 @@ export default function CartPage() {
                       src={imageUrl}
                       alt={item.foodId.name || "Food image"}
                       style={{ height: "180px", objectFit: "cover" }}
+                      onError={(e) => {
+                        e.target.onerror = null;
+                        e.target.src =
+                          "https://via.placeholder.com/300x180?text=No+Image";
+                      }}
                     />
                     <Card.Body>
                       <Card.Title>{item.foodId.name || "Unnamed Food"}</Card.Title>
@@ -123,7 +134,10 @@ export default function CartPage() {
                           variant="outline-secondary"
                           size="sm"
                           onClick={() =>
-                            handleQuantityChange(item.foodId._id, item.quantity - 1)
+                            handleQuantityChange(
+                              item.foodId._id,
+                              item.quantity - 1
+                            )
                           }
                         >
                           −
@@ -133,14 +147,17 @@ export default function CartPage() {
                           variant="outline-secondary"
                           size="sm"
                           onClick={() =>
-                            handleQuantityChange(item.foodId._id, item.quantity + 1)
+                            handleQuantityChange(
+                              item.foodId._id,
+                              item.quantity + 1
+                            )
                           }
                         >
                           +
                         </Button>
                       </div>
                       <Button
-                        variant="danger"
+                        variant="success"
                         className="w-100 fw-semibold"
                         onClick={() => handleRemove(item.foodId._id)}
                       >
@@ -155,7 +172,11 @@ export default function CartPage() {
 
           <div className="text-end mt-3 me-2">
             <h5>Total: ₱{calculateTotal().toFixed(2)}</h5>
-            <Button variant="outline-danger" className="me-2" onClick={handleClearCart}>
+            <Button
+              variant="outline-danger"
+              className="me-2"
+              onClick={handleClearCart}
+            >
               Clear Cart
             </Button>
             <Button
