@@ -10,7 +10,7 @@ export default function RestaurantSpinner() {
     const interval = setInterval(() => {
       const randomFood = foodEmojis[Math.floor(Math.random() * foodEmojis.length)];
       setFood(randomFood);
-    }, 300); // Change emoji every 0.3 seconds
+    }, 500); // Change emoji every 0.5 seconds
 
     return () => clearInterval(interval); // Cleanup when unmounted
   }, []);
