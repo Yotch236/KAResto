@@ -158,6 +158,12 @@ export default function Login() {
                       {showPassword ? <FaEyeSlash /> : <FaEye />}
                     </Button>
                   </div>
+
+                  <div className="mb-2 text-start">
+                    <a href="/forgot-password" className='text-decoration-none text-success fw-bold'>
+                      Forgot Password?
+                    </a>
+                  </div>
                 </Form.Group>
 
                 <Button
@@ -171,7 +177,7 @@ export default function Login() {
 
                 <div className='text-center mt-3'>
                   <span className='fw-semibold'>Don't have an account?</span>
-                  <a href="/register" className='fw-semibold text-success'> Register</a>
+                  <a href="/register" className='fw-semibold text-success text-decoration-none'> Register</a>
                 </div>
               </Form>
             </div>
